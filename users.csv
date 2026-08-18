@@ -1,0 +1,4 @@
+﻿id;name;email;role
+1;Алексей;alex@example.com;Админ
+2;Мария;maria@example.com;Пользователь
+3;Иван;ivan@example.com;Модератор
