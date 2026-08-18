@@ -1,26 +1,25 @@
 ﻿import csv
 import os
+import smtplib
+from email.message import EmailMessage
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-# Изменяю для прверки GIT
+
 # Имя файла с данными
 CSV_FILE = "users.csv"
 
 
 def load_data_from_csv():
     """Функция загрузки данных из CSV-файла."""
-    # Если файла еще нет, создадим тестовый для примера
     if not os.path.exists(CSV_FILE):
         create_test_csv()
 
     data = []
     try:
-        # Открываем файл с кодировкой utf-8-sig (убирает невидимый маркер Excel BOM)
         with open(CSV_FILE, mode="r", encoding="utf-8-sig") as f:
-            # Excel в СНГ использует точку с запятой в качестве разделителя CSV
             reader = csv.reader(f, delimiter=";")
-            header = next(reader)  # Пропускаем строку-заголовок (id;name...)
+            next(reader)  # Пропускаем заголовок
 
             for row in reader:
                 if row:  # Проверка на пустые строки
@@ -29,15 +28,14 @@ def load_data_from_csv():
         messagebox.showerror(
             "Ошибка", f"Не удалось прочитать файл {CSV_FILE}:\n{e}"
         )
-
     return data
 
 
 def create_test_csv():
-    """Создает файл, если его не существует."""
+    """Создает тестовый файл, если его не существует."""
     test_data = [
         ["id", "name", "email", "role"],
-        ["1", "Алексей", "alex@example.com", "Админ"],
+        ["1", "Алексей", "artyombirulya@gmail.com", "Админ"],  # Ваш email для теста
         ["2", "Мария", "maria@example.com", "Пользователь"],
         ["3", "Иван", "ivan@example.com", "Модератор"],
     ]
@@ -48,7 +46,6 @@ def create_test_csv():
 
 def send_emails():
     """Функция рассылки писем по всему списку из таблицы."""
-    # Получаем все строки, которые сейчас отображаются в Grid (Treeview)
     all_items = tree.get_children()
 
     if not all_items:
@@ -59,25 +56,52 @@ def send_emails():
 
     # Проходим циклом по каждой строке таблицы
     for item in all_items:
-        # Извлекаем значения колонок (возвращает кортеж: id, name, email, role)
         values = tree.item(item, "values")
         user_name = values[1]
         user_email = values[2]
 
-        # Логика отправки
         print(f"Отправка на {user_email}: Hello, {user_name}!")
-        # Здесь в будущем будет реальный код SMTP. Пока имитируем отправку.
 
-        sent_count += 1
+        # НАСТРОЙКИ ЯНДЕКСА
+        SENDER = "artmbirulya@yandex.com"  # Изменили .com на .ru
+        PASSWORD = "fiwvbwzisbfnincq"  # Ваш 16-значный пароль приложения
+        RECIPIENT = user_email
 
-    # Показываем красивое окно об успешном завершении
-    messagebox.showinfo(
-        "Рассылка завершена",
-        f"Успешно обработано пользователей: {sent_count}.\nВсем отправлено сообщение 'hello'!",
-    )
+        # Создание письма
+        msg = EmailMessage()
+        msg["Subject"] = "Тестовое письмо"
+        msg["From"] = SENDER
+        msg["To"] = RECIPIENT
+        msg.set_content(
+            f"Hello, {user_name}!\n\nУра! Код на Python работает, и письмо успешно отправлено!"
+        )
+
+        # Отправка через сервер Яндекса
+        try:
+            with smtplib.SMTP_SSL("smtp.yandex.ru", 465) as server:
+                server.set_debuglevel(1)  # Логи включаются ДО авторизации
+                server.login(SENDER, PASSWORD)
+                server.send_message(msg)
+
+            print(f"Письмо для {user_name} успешно отправлено!")
+            sent_count += 1  # Считаем только успешные
+
+        except Exception as e:
+            print(f"Произошла ошибка при отправке на {user_email}: {e}")
+            messagebox.showerror(
+                "Произошла ошибка при отправке",
+                f"Не удалось отправить письмо для {user_name} ({user_email}):\n{e}",
+            )
+
+    # ОКНО УВЕДОМЛЕНИЯ (Вынесено из цикла наружу)
+    if sent_count > 0:
+        messagebox.showinfo(
+            "Рассылка завершена",
+            f"Успешно отправлено писем: {sent_count}.",
+        )
 
 
-# --- ИНТЕРФЕЙС ТКINTER ---
+# --- ИНТЕРФЕЙС TKINTER ---
 
 root = tk.Tk()
 root.title("Панель рассылки пользователям")
@@ -121,7 +145,6 @@ tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 btn_send = ttk.Button(
     root, text="Разослать 'hello' всем пользователям", command=send_emails
 )
-# Размещаем кнопку с отступами снизу таблицы
 btn_send.pack(pady=15, ipady=5, fill=tk.X, padx=10)
 
 root.mainloop()
