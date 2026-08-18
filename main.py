@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
-# Имя файла с данными
+# Имя файла с данными!
 CSV_FILE = "users.csv"
 
 
