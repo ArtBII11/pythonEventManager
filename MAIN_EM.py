@@ -11,7 +11,11 @@ CSV_FILE_MEET = "Meetings.csv"
 def load_data_from_csv():
     """Функция загрузки данных из CSV-файла."""
     if not os.path.exists(CSV_FILE_MEET):
-        create_test_csv()
+        choice = messagebox.askyesno("Не найден файл Meetings.csv", "Создать пустой файл?")
+        if choice:
+            create_test_csv()
+        else:
+            root.destroy()
 
     data = []
     try:
