@@ -46,12 +46,15 @@ root = tk.Tk()
 root.title("Event manager")
 root.geometry("550x350")
 
+label_title = tk.Label(root, text="Список запланированных мероприятий",font=("Arial",12,"bold"))
+label_title.pack(pady=(20,0))
 
-container = ttk.Frame(root)
-container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+container = ttk.Frame(root,height=200,width=600)#----Контейнер для схемы
+container.pack_propagate(False)
+container.pack(padx=20,pady=10)
 
 
-scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL)
+scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL)#----Скролбар
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 columns = ("name", "email", "role")
@@ -76,5 +79,14 @@ for user in users_data:
     tree.insert("", tk.END, values=user)
 
 tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+def clicked():
+
+    print("Ouh,braenz!")
+
+btn = tk.Button(root, text = "Создать мероприятие" ,width=50,height=3,command=clicked)
+
+btn.pack()
+
 
 root.mainloop()
