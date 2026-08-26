@@ -1,3 +1,4 @@
+import sys
 import csv
 import os
 import smtplib
@@ -13,12 +14,13 @@ def load_data_from_csv():
     # 1. Проверяем, существует ли файл
     if not os.path.exists(CSV_FILE_MEET):
         choice = messagebox.askyesno(
-            "Не найден файл Meetings.csv", "Создать пустой файл?"
+            "Не найден файл Meetings.csv", "Создать файл с шаблоном?"
         )
         if choice:
             create_test_csv()  # Создаем файл
         else:
-            return []  # Если отказался создавать, сразу возвращаем пустой список
+            root.destroy()
+            sys.exit()
 
     # 2. Этот блок СДВИНУТ НАЗАД. Он сработает в любом случае:
     # и если файл уже был, и если мы его только что создали.
