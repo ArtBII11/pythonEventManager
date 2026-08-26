@@ -167,6 +167,41 @@ root.title("Event manager(Editing)")
 root.geometry("550x750")
 
 
+container = ttk.Frame(root)
+container.grid(column=0,row=2,ipadx=100,ipady=100)
+
+
+# Создаем таблицу (Treeview)
+columns = ("id", "name", "email", "role")
+tree = ttk.Treeview(
+    container, columns=columns, show="headings"
+)
+
+# Задаем заголовки колонок
+tree.heading("id", text="ID")
+tree.heading("name", text="Имя")
+tree.heading("email", text="Email")
+tree.heading("role", text="Роль")
+
+# Задаем размеры колонок
+tree.column("id", width=40, anchor=tk.CENTER)
+tree.column("name", width=120)
+tree.column("email", width=180)
+tree.column("role", width=100)
+
+# Загружаем данные из файла и вставляем в таблицу
+users_data = load_data_from_csv()
+for user in users_data:
+    tree.insert("", tk.END, values=user)
+
+tree.grid(column=0,row=2,ipadx=100,ipady=100)
+
+# КНОПКА РАССЫЛКИ (Снизу)
+btn_send = ttk.Button(
+    root, text="Разослать 'hello' всем пользователям", command=send_emails
+)
+btn_send.grid(column=4,row=2,ipadx=10,ipady=10)
+
 
 def off_entry_mouse(event):
     current_entry = event.widget
