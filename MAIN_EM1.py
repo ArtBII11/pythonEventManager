@@ -9,6 +9,14 @@ from tkinter import ttk
 
 CSV_FILE_MEET = "Meetings.csv"
 
+
+
+
+
+
+
+
+
 def load_data_from_csv():
     """Функция загрузки данных из CSV-файла."""
     # 1. Проверяем, существует ли файл
@@ -22,8 +30,6 @@ def load_data_from_csv():
             root.destroy()
             sys.exit()
 
-    # 2. Этот блок СДВИНУТ НАЗАД. Он сработает в любом случае:
-    # и если файл уже был, и если мы его только что создали.
     data = []
     try:
         with open(CSV_FILE_MEET, mode="r", encoding="utf-8-sig") as f:
