@@ -154,21 +154,22 @@ def create_test_csv_meet():
         writer = csv.writer(f, delimiter=";")
         writer.writerows(test_data)
 
+
+
 def enter_function_input(event):
     text_placeholder = placeholder_map.get(event.widget)
-    if event.widget.get() == text_placeholder:
-        root.focus_set()
-        name_of_Meet = str(entry_name.get())
-    return name_of_Meet
+    if event.widget.get() != text_placeholder and event.widget.get() != "":
+        event.widget.config(state="readonly")
+
 
 
 root = tk.Tk()
 root.title("Event manager(Editing)")
-root.geometry("550x750")
+root.geometry("750x750")
 
 
 container = ttk.Frame(root)
-container.grid(column=0,row=2,ipadx=100,ipady=100)
+container.grid(column=0,row=2,ipadx=30,ipady=30)
 
 
 # Создаем таблицу (Treeview)
@@ -194,7 +195,7 @@ users_data = load_data_from_csv()
 for user in users_data:
     tree.insert("", tk.END, values=user)
 
-tree.grid(column=0,row=2,ipadx=100,ipady=100)
+tree.grid(column=0,row=2,ipadx=10,ipady=10)
 
 # КНОПКА РАССЫЛКИ (Снизу)
 btn_send = ttk.Button(
@@ -221,6 +222,7 @@ entry_name.grid(column=1,row=0,ipady=15,ipadx=100,pady=3)
 placeholder_map[entry_name] = "Введите сюда название..."
 entry_name.insert(0, "Введите сюда название...")
 
+
 entry_name.bind("<FocusIn>", on_entry_click)
 entry_name.bind("<FocusOut>",off_entry_mouse)
 entry_name.bind("<Return>",enter_function_input)
@@ -234,7 +236,7 @@ entry_time.insert(0,"Время...")
 placeholder_map[entry_time] = "Время..."
 entry_time.bind("<FocusIn>", on_entry_click)
 entry_time.bind("<FocusOut>",off_entry_mouse)
-entry_name.bind("<Return>",enter_function_input)
+entry_time.bind("<Return>",enter_function_input)
 
 
 entry_data = ttk.Entry(root)
@@ -243,7 +245,7 @@ entry_data.insert(0,"Дата...")
 placeholder_map[entry_data] = "Дата..."
 entry_data.bind("<FocusIn>", on_entry_click)
 entry_data.bind("<FocusOut>",off_entry_mouse)
-entry_name.bind("<Return>",enter_function_input)
+entry_data.bind("<Return>",enter_function_input)
 
 
 
