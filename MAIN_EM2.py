@@ -10,7 +10,7 @@ from tkinter import ttk
 CSV_FILE_MEET = "Meetings.csv"
 CSV_FILE = "users.csv"
 
-def load_data_from_csv():
+def load_data_from_csv_users():
     """Функция загрузки данных из CSV-файла."""
     if not os.path.exists(CSV_FILE):
         create_test_csv_users()
@@ -47,7 +47,7 @@ def create_test_csv_users():
 
 def send_emails():
     """Функция рассылки писем по всему списку из таблицы."""
-    all_items = tree.get_children()
+    all_items = tree_of_users.get_children()
 
     if not all_items:
         messagebox.showwarning("Внимание", "Список пользователей пуст!")
@@ -57,7 +57,7 @@ def send_emails():
 
     # Проходим циклом по каждой строке таблицы
     for item in all_items:
-        values = tree.item(item, "values")
+        values = tree_of_users.item(item, "values")
         user_name = values[1]
         user_email = values[2]
 
@@ -70,12 +70,12 @@ def send_emails():
 
         # Создание письма
         msg = EmailMessage()
-        msg["Subject"] = f" meeting named{entry_name.get()}"
+        msg["Subject"] = f" meeting named: {entry_name.get()}"
         print(entry_name.get())
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time {entry_time.get()}."
+            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time: {entry_time.get()}."
         )
 
         # Отправка через сервер Яндекса
@@ -166,43 +166,79 @@ def enter_function_input(event):
 
 root = tk.Tk()
 root.title("Event manager(Editing)")
-root.geometry("750x750")
+root.resizable(False, False)
+root.geometry("750x900")
 
+container_meetings = ttk.Frame(root)
+container_meetings.grid(column=1,row=4,ipadx=30,ipady=30,padx=10,pady=5,sticky="w")
 
-container = ttk.Frame(root)
-container.grid(column=0,row=2,ipadx=30,ipady=30)
+scrollbar_meetings = ttk.Scrollbar(container_meetings, orient=tk.VERTICAL)#----Скролбар
+scrollbar_meetings.grid(column=2,sticky="w",row=4,ipady=100)
+
+container_users = ttk.Frame(root)
+container_users.grid(column=1,row=3,ipadx=30,ipady=30,padx=10,pady=5)
+
+scrollbar_users = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
+scrollbar_users.grid(column=2,sticky="w",row=3,ipady=100)
 
 
 # Создаем таблицу (Treeview)
-columns = ("id", "name", "email", "role")
-tree = ttk.Treeview(
-    container, columns=columns, show="headings"
-)
 
-# Задаем заголовки колонок
-tree.heading("id", text="ID")
-tree.heading("name", text="Имя")
-tree.heading("email", text="Email")
-tree.heading("role", text="Роль")
+columns_meetings = ("name_of_meet", "date", "time")
+tree_of_meetings = ttk.Treeview(container_meetings, columns=columns_meetings, show="headings", yscrollcommand=scrollbar_meetings.set)
+scrollbar_meetings.config(command=tree_of_meetings.yview)
+
+columns_users = ("id", "name", "email", "role")
+tree_of_users = ttk.Treeview(container_users, columns=columns_users, show="headings",yscrollcommand=scrollbar_users.set)
+scrollbar_users.config(command=tree_of_users.yview)
+
+tree_of_meetings.heading("name_of_meet", text="Название мероприятия")
+tree_of_meetings.heading("date", text="Конец мероприятия")
+tree_of_meetings.heading("time", text="Начало мероприятия")
 
 # Задаем размеры колонок
-tree.column("id", width=40, anchor=tk.CENTER)
-tree.column("name", width=120)
-tree.column("email", width=180)
-tree.column("role", width=100)
+tree_of_meetings.column("name_of_meet", width=120, anchor=tk.CENTER)
+tree_of_meetings.column("date", width=120)
+tree_of_meetings.column("time", width=120)
+
+meet_data = load_data_from_csv_meet()
+for user in meet_data:
+    tree_of_meetings.insert("", tk.END, values=user)
+
+tree_of_meetings.grid(column=1,row=4,ipadx=0,ipady=0,pady=5)
+
+# Задаем заголовки колонок
+tree_of_users.heading("id", text="ID")
+tree_of_users.heading("name", text="Имя")
+tree_of_users.heading("email", text="Email")
+tree_of_users.heading("role", text="Роль")
+
+# Задаем размеры колонок
+tree_of_users.column("id", width=40, anchor=tk.CENTER)
+tree_of_users.column("name", width=120)
+tree_of_users.column("email", width=180)
+tree_of_users.column("role", width=100)
 
 # Загружаем данные из файла и вставляем в таблицу
-users_data = load_data_from_csv()
+users_data = load_data_from_csv_users()
 for user in users_data:
-    tree.insert("", tk.END, values=user)
+    tree_of_users.insert("", tk.END, values=user)
 
-tree.grid(column=0,row=2,ipadx=10,ipady=10)
+tree_of_users.grid(column=1,row=3,ipadx=0,ipady=0,pady=0)
 
-# КНОПКА РАССЫЛКИ (Снизу)
+
+
+
+
+
+
+
+style = ttk.Style()
+style.configure("My.TButton",font=("Arial", 12, "bold"),)
+
 btn_send = ttk.Button(
-    root, text="Разослать 'hello' всем пользователям", command=send_emails
-)
-btn_send.grid(column=4,row=2,ipadx=10,ipady=10)
+    root, text="Разослать всем пользователям", command=send_emails,style="My.TButton")
+btn_send.grid(column=1, row=5, columnspan=2, pady=15, ipady=10, sticky="ew")
 
 
 def off_entry_mouse(event):
@@ -219,7 +255,7 @@ def on_entry_click(event):
 
 
 entry_name = ttk.Entry(root,font=("Arial", 13))
-entry_name.grid(column=1,row=0,ipady=15,ipadx=100,pady=3)
+entry_name.grid(column=2,row=0,ipady=10,ipadx=20,pady=20,padx=(0,15))
 placeholder_map[entry_name] = "Введите сюда название..."
 entry_name.insert(0, "Введите сюда название...")
 
@@ -232,7 +268,7 @@ entry_name.bind("<Return>",enter_function_input)
 
 
 entry_time = ttk.Entry(root)
-entry_time.grid(column=0,row=1,pady=(80,5),ipady=5)
+entry_time.grid(column=1,row=0,pady=(80,5),ipady=5,sticky="w",padx=10)
 entry_time.insert(0,"Время...")
 placeholder_map[entry_time] = "Время..."
 entry_time.bind("<FocusIn>", on_entry_click)
@@ -241,7 +277,7 @@ entry_time.bind("<Return>",enter_function_input)
 
 
 entry_data = ttk.Entry(root)
-entry_data.grid(column=0,row=2,pady=(5,0),ipady=5)
+entry_data.grid(column=1,row=1,pady=(5,0),ipady=5,sticky="w",padx=10)
 entry_data.insert(0,"Дата...")
 placeholder_map[entry_data] = "Дата..."
 entry_data.bind("<FocusIn>", on_entry_click)
@@ -258,8 +294,7 @@ entry_data.bind("<Return>",enter_function_input)
 # container.pack(padx=20,pady=10)
 
 
-# scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL)#----Скролбар
-# scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
 
 # columns = ("name", "email", "role")
 # tree = ttk.Treeview(
