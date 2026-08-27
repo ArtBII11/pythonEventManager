@@ -70,11 +70,12 @@ def send_emails():
 
         # Создание письма
         msg = EmailMessage()
-        msg["Subject"] = "Тестовое письмо"
+        msg["Subject"] = f" meeting named{entry_name.get()}"
+        print(entry_name.get())
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Hello, {user_name}!\n\nУра! Код на Python работает, и письмо успешно отправлено!"
+            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time {entry_time.get()}."
         )
 
         # Отправка через сервер Яндекса
