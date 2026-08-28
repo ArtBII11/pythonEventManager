@@ -7,6 +7,8 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter import filedialog
+import os
+import docx
 
 
 CSV_FILE_MEET = "Meetings.csv"
@@ -16,12 +18,11 @@ text = ""
 
 
 def attach_file_doc():
-    # Открывает диалоговое окно для выбора любого файла
     global text
     file_formats = [
-        ("Документы (*.txt, *.doc, *.docx)", "*.txt *.doc *.docx"),
+        ("Документы (*.txt, *.docx)", "*.txt *.docx"),
         ("Текстовые файлы (*.txt)", "*.txt"),
-        ("Документы Word (*.doc, *.docx)", "*.doc *.docx"),
+        ("Документы Word (*.docx)", "*.docx"),
     ]
 
     file_path = filedialog.askopenfilename(
@@ -30,12 +31,42 @@ def attach_file_doc():
     )
 
     if file_path:
-        # Здесь файл успешно выбран, выводим путь в консоль
         print(f"Файл успешно прикреплен: {file_path}")
 
-        with open(f"{file_path}", "r", encoding="cp1251") as f:
-            text = f.read()
-            print(text)
+        # Получаем расширение файла (например, '.txt' или '.docx')
+        _, extension = os.path.splitext(file_path.lower())
+
+        try:
+            # ЕСЛИ ЭТО ФАЙЛ WORD (.docx)
+            if extension == ".docx":
+                doc = docx.Document(file_path)
+                # Собираем все абзацы из файла Word в одну текстовую переменную,
+                # разделяя их обычными переносами строк \n
+                text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+
+            # ЕСЛИ ЭТО ОБЫЧНЫЙ ТЕКСТ (.txt)
+            else:
+                with open(file_path, "r", encoding="cp1251") as f:
+                    text = f.read()
+
+            # Проверяем, удалось ли вытащить текст
+            if text.strip():
+                print("--- УСПЕШНО ПРОЧИТАННЫЙ ТЕКСТ ---")
+                print(text)
+                print("---------------------------------")
+                messagebox.showinfo(
+                    "Успех", f"Файл прочитан! Найдено {len(text)} символов."
+                )
+            else:
+                messagebox.showwarning(
+                    "Внимание", "Файл открыт, но текста внутри не обнаружено."
+                )
+
+        except Exception as e:
+            messagebox.showerror(
+                "Ошибка",
+                f"Не удалось прочитать файл. Возможно, он открыт в другой программе.\nОшибка: {e}",
+            )
 
 
 def load_data_from_csv_users():
