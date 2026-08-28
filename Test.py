@@ -1,65 +1,78 @@
+import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import filedialog, messagebox
 
+# 1. Создаем глобальную переменную. Сюда запишется текст из файла.
+mail_body = ""
+
+
+def attach_file():
+    global mail_body  # Обязательно пишем global, чтобы изменить переменную внутри функции
+    file_formats = [("Текстовые файлы (*.txt)", "*.txt")]
+
+    full_path = filedialog.askopenfilename(
+        title="Выберите файл с текстом письма", filetypes=file_formats
+    )
+
+    if full_path:
+        file_name = os.path.basename(full_path)
+        try:
+            with open(full_path, "r", encoding="utf-8") as file:
+                # Читаем текст и сохраняем в нашу глобальную переменную
+                mail_body = file.read()
+
+            # Также выводим этот текст в окошко, чтобы пользователь его видел
+            text_area.delete("1.0", tk.END)
+            text_area.insert("1.0", mail_body)
+
+            label_status.config(text=f"Файл '{file_name}' загружен", fg="green")
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось прочитать файл:\n{e}")
+
+
+# 2. Функция, которая отправляет письмо
+def send_email():
+    # САМЫЙ НАДЕЖНЫЙ СПОСОБ: берем текст напрямую из текстового поля экрана,
+    # чтобы точно подхватить все абзацы и изменения, которые сделал пользователь
+    text_from_screen = text_area.get("1.0", tk.END).strip()
+
+    if not text_from_screen:
+        messagebox.showwarning("Внимание", "Письмо пустое! Нечего отправлять.")
+        return
+
+    # Теперь в переменной text_from_screen лежит ваш готовый текст с абзацами.
+    # Передаем её в ваш код отправки письма:
+    print("--- НАЧАЛО ПИСЬМА ---")
+    print(text_from_screen)  # Вы увидите в консоли, что текст перенесся с абзацами
+    print("--- КОНЕЦ ПИСЬМА ---")
+
+    # Имитация отправки (сюда вставьте ваш код, например, для smtplib или requests)
+    messagebox.showinfo(
+        "Успех", "Текст успешно перенесен в письмо и готов к отправке!"
+    )
+
+
+# Создаем интерфейс
 root = tk.Tk()
-root.geometry("550x250")
+root.title("Подготовка письма")
+root.geometry("500x450")
 
-# 1. СОЗДАЕМ КАРТУ ПОДСКАЗОК (Словарь)
-# Мы свяжем системные имена полей ввода с их текстами-подсказками
-placeholder_map = {}
+# Кнопка прикрепления
+btn_attach = tk.Button(root, text="📎 Прикрепить текст из файла", command=attach_file)
+btn_attach.pack(pady=10)
 
+label_status = tk.Label(root, text="Файл не выбран", fg="gray")
+label_status.pack()
 
-def clear_placeholder(event):
-    """Общая функция очистки (работает, как мы разбирали ранее)."""
-    current_entry = event.widget
-    # Берем подсказку, которая закреплена за этим конкретным инпутом
-    text_placeholder = placeholder_map.get(current_entry)
+# Текстовое поле (обязательно wrap="word" для красивых абзацев)
+text_area = tk.Text(root, wrap="word", height=12, width=55)
+text_area.pack(pady=10)
 
-    if current_entry.get() == text_placeholder:
-        current_entry.delete(0, tk.END)
-
-
-# 2. ОБЩАЯ ФУНКЦИЯ ВОЗВРАТА ПОДСКАЗКИ
-def restore_placeholder(event):
-    # event.widget сообщает, из какого поля ушел курсор
-    current_entry = event.widget
-
-    # Ищем в нашем словаре, какая подсказка должна быть у этого инпута
-    text_placeholder = placeholder_map.get(current_entry)
-
-    # Главное условие: если пользователь ничего не написал (поле абсолютно пустое)
-    if current_entry.get() == "":
-        # Возвращаем на место именно его родную подсказку
-        current_entry.insert(0, text_placeholder)
-
-
-# --- СОЗДАНИЕ И НАСТРОЙКА ПОЛЕЙ ---
-
-# ПОЛЕ 1: Название
-entry_name = ttk.Entry(root, font=("Arial", 16))
-entry_name.grid(column=1, row=0, rowspan=2, padx=8, pady=15, ipady=15, sticky="ew")
-entry_name.insert(0, "Введите сюда название...")
-# Запоминаем: для entry_name подсказка — "Введите сюда название..."
-placeholder_map[entry_name] = "Введите сюда название..."
-
-# ПОЛЕ 2: Время
-entry_time = ttk.Entry(root)
-entry_time.grid(column=0, row=0, padx=8, pady=15, ipady=5, sticky="ew")
-entry_time.insert(0, "Время...")
-# Запоминаем: для entry_time подсказка — "Время..."
-placeholder_map[entry_time] = "Время..."
-
-# ПОЛЕ 3: Дата
-entry_data = ttk.Entry(root)
-entry_data.grid(column=0, row=1, padx=8, pady=15, ipady=5, sticky="ew")
-entry_data.insert(0, "Дата...")
-# Запоминаем: для entry_data подсказка — "Дата..."
-placeholder_map[entry_data] = "Дата..."
-
-
-# 3. АВТОМАТИЧЕСКАЯ ПОМЕТКА ВСЕХ ПОЛЕЙ СРАЗУ
-# Говорим Tkinter: "Пусть ВСЕ элементы ttk.Entry реагируют на вход и выход курсора"
-root.bind_class("TEntry", "<FocusIn>", clear_placeholder)
-root.bind_class("TEntry", "<FocusOut>", restore_placeholder)
+# Кнопка отправки
+btn_send = tk.Button(
+    root, text="✉️ Отправить это письмо", bg="#4CAF50", fg="white", command=send_email
+)
+btn_send.pack(pady=10)
 
 root.mainloop()

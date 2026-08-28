@@ -6,9 +6,37 @@ from email.message import EmailMessage
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from tkinter import filedialog
+
 
 CSV_FILE_MEET = "Meetings.csv"
 CSV_FILE = "users.csv"
+text = ""
+
+
+
+def attach_file_doc():
+    # Открывает диалоговое окно для выбора любого файла
+    global text
+    file_formats = [
+        ("Документы (*.txt, *.doc, *.docx)", "*.txt *.doc *.docx"),
+        ("Текстовые файлы (*.txt)", "*.txt"),
+        ("Документы Word (*.doc, *.docx)", "*.doc *.docx"),
+    ]
+
+    file_path = filedialog.askopenfilename(
+        title="Выберите файл для прикрепления",
+        filetypes=file_formats,
+    )
+
+    if file_path:
+        # Здесь файл успешно выбран, выводим путь в консоль
+        print(f"Файл успешно прикреплен: {file_path}")
+
+        with open(f"{file_path}", "r", encoding="cp1251") as f:
+            text = f.read()
+            print(text)
+
 
 def load_data_from_csv_users():
     """Функция загрузки данных из CSV-файла."""
@@ -46,6 +74,7 @@ def create_test_csv_users():
 
 
 def send_emails():
+    global text
     """Функция рассылки писем по всему списку из таблицы."""
     all_items = tree_of_users.get_children()
 
@@ -75,8 +104,9 @@ def send_emails():
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time: {entry_time.get()}."
+            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time: {entry_time.get()}. \n{text}"
         )
+        print(text)
 
         # Отправка через сервер Яндекса
         try:
@@ -164,19 +194,24 @@ def enter_function_input(event):
 
 
 
+
+
+
+
+
 root = tk.Tk()
 root.title("Event manager(Editing)")
 root.resizable(False, False)
 root.geometry("750x900")
 
 container_meetings = ttk.Frame(root)
-container_meetings.grid(column=1,row=4,ipadx=30,ipady=30,padx=10,pady=5,sticky="w")
+container_meetings.grid(column=1,row=4,padx=10,sticky="w")
 
 scrollbar_meetings = ttk.Scrollbar(container_meetings, orient=tk.VERTICAL)#----Скролбар
 scrollbar_meetings.grid(column=2,sticky="w",row=4,ipady=100)
 
 container_users = ttk.Frame(root)
-container_users.grid(column=1,row=3,ipadx=30,ipady=30,padx=10,pady=5)
+container_users.grid(column=1,row=3,padx=10)
 
 scrollbar_users = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
 scrollbar_users.grid(column=2,sticky="w",row=3,ipady=100)
@@ -193,8 +228,8 @@ tree_of_users = ttk.Treeview(container_users, columns=columns_users, show="headi
 scrollbar_users.config(command=tree_of_users.yview)
 
 tree_of_meetings.heading("name_of_meet", text="Название мероприятия")
-tree_of_meetings.heading("date", text="Конец мероприятия")
-tree_of_meetings.heading("time", text="Начало мероприятия")
+tree_of_meetings.heading("date", text="Дата мероприятия")
+tree_of_meetings.heading("time", text="Время мероприятия")
 
 # Задаем размеры колонок
 tree_of_meetings.column("name_of_meet", width=120, anchor=tk.CENTER)
@@ -205,7 +240,7 @@ meet_data = load_data_from_csv_meet()
 for user in meet_data:
     tree_of_meetings.insert("", tk.END, values=user)
 
-tree_of_meetings.grid(column=1,row=4,ipadx=0,ipady=0,pady=5)
+tree_of_meetings.grid(column=1,row=4,ipadx=0,ipady=0)
 
 # Задаем заголовки колонок
 tree_of_users.heading("id", text="ID")
@@ -238,8 +273,10 @@ style.configure("My.TButton",font=("Arial", 12, "bold"),)
 
 btn_send = ttk.Button(
     root, text="Разослать всем пользователям", command=send_emails,style="My.TButton")
-btn_send.grid(column=1, row=5, columnspan=2, pady=15, ipady=10, sticky="ew")
+btn_send.grid(column=1, row=6, columnspan=3, pady=15, ipady=10)
 
+btn_attach = ttk.Button(root,text="📎Прикрепить текстовый файл📎",command=attach_file_doc,style="My.TButton")
+btn_attach.grid(column=1, row=5, columnspan=3, pady=15, ipady=10)
 
 def off_entry_mouse(event):
     current_entry = event.widget
