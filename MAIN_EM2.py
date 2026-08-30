@@ -231,22 +231,22 @@ root.title("Event manager(Editing)")
 root.geometry("750x900")
 
 container_meetings = ttk.Frame(root)
-container_meetings.grid(column=1,row=4,padx=10,sticky="w")
+container_meetings.grid(column=1,row=5,padx=10,sticky="w")
 
 scrollbar_meetings = ttk.Scrollbar(container_meetings, orient=tk.VERTICAL)#----Скролбар
-scrollbar_meetings.grid(column=2,sticky="w",row=4,ipady=100)
+scrollbar_meetings.grid(column=2,sticky="w",row=5,ipady=100)
 
 container_users = ttk.Frame(root)
-container_users.grid(column=1,row=3,padx=10)
+container_users.grid(column=1,row=3,padx=10,sticky="w")
 
 scrollbar_users = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
 scrollbar_users.grid(column=2,sticky="w",row=3,ipady=100)
 
 container_guest = ttk.Frame(root)
-container_guest.grid(column=1,row=3,padx=10)
+container_guest.grid(column=1,row=4,padx=10,sticky="w")
 
-scrollbar_guest = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
-scrollbar_guest.grid(column=2,sticky="w",row=3,ipady=100)
+scrollbar_guest = ttk.Scrollbar(container_guest, orient=tk.VERTICAL)#----Скролбар
+scrollbar_guest.grid(column=2,sticky="w",row=4,ipady=100)
 
 # Создаем таблицу (Treeview)
 
@@ -271,7 +271,7 @@ meet_data = load_data_from_csv("Meetings.csv")
 for meet in meet_data:
     tree_of_meetings.insert("", tk.END, values=meet)
 
-tree_of_meetings.grid(column=1,row=4,ipadx=0,ipady=0)
+tree_of_meetings.grid(column=1,row=5,ipadx=0,ipady=0)
 
 # Задаем заголовки колонок
 tree_of_users.heading("id", text="ID")
@@ -293,7 +293,7 @@ for user in users_data:
 tree_of_users.grid(column=1,row=3,ipadx=0,ipady=0,pady=0)
 
 columns_guest = ("id", "name", "email")
-tree_of_guest = ttk.Treeview(container_users, columns=columns_users, show="headings",yscrollcommand=scrollbar_users.set)
+tree_of_guest = ttk.Treeview(container_guest, columns=columns_guest, show="headings",yscrollcommand=scrollbar_guest.set)
 scrollbar_guest.config(command=tree_of_users.yview)
 
 tree_of_guest.heading("id", text="ID")
@@ -305,14 +305,13 @@ tree_of_guest.heading("email", text="Email")
 tree_of_guest.column("id", width=40, anchor=tk.CENTER)
 tree_of_guest.column("name", width=120)
 tree_of_guest.column("email", width=180)
-tree_of_guest.column("role", width=100)
 
 # Загружаем данные из файла и вставляем в таблицу
 guest_data = load_data_from_csv("guests.csv")
 for guest in guest_data:
     tree_of_guest.insert("", tk.END, values=guest)
 
-tree_of_guest.grid(column=1,row=5,ipadx=0,ipady=0,pady=0)
+tree_of_guest.grid(column=1,row=4,ipadx=0,ipady=0,pady=0)
 
 
 
@@ -327,10 +326,10 @@ btn_send = ttk.Button(
 btn_send.grid(column=1, row=6, columnspan=3, pady=15, ipady=10)
 
 btn_attach_member = ttk.Button(root,text="Прикрепить шаблон участника",command=lambda:attach_file_doc("member"),style="My.TButton")
-btn_attach_member .grid(column=2, row=4, pady=15, ipady=10)
+btn_attach_member .grid(column=2, row=3, pady=15, ipady=10)
 
 btn_attach_guest = ttk.Button(root,text="Прикрепить шаблон гостя",command=lambda:attach_file_doc("guest"),style="My.TButton")
-btn_attach_guest.grid(column=2, row=3, pady=15, ipady=10)
+btn_attach_guest.grid(column=2, row=4, pady=15, ipady=10)
 
 def off_entry_mouse(event):
     current_entry = event.widget
