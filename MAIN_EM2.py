@@ -13,12 +13,13 @@ import docx
 
 CSV_FILE_MEET = "Meetings.csv"
 CSV_FILE = "users.csv"
-text = ""
+text_guest = ""
+text_member = ""
 
 
-
-def attach_file_doc():
-    global text
+def attach_file_doc(id_button):
+    global text_guest
+    global text_member
     file_formats = [
         ("Документы (*.txt, *.docx)", "*.txt *.docx"),
         ("Текстовые файлы (*.txt)", "*.txt"),
@@ -39,28 +40,39 @@ def attach_file_doc():
         try:
             # ЕСЛИ ЭТО ФАЙЛ WORD (.docx)
             if extension == ".docx":
-                doc = docx.Document(file_path)
-                # Собираем все абзацы из файла Word в одну текстовую переменную,
-                # разделяя их обычными переносами строк \n
-                text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+                if id_button == "member":
+                    doc = docx.Document(file_path)
+                    # Собираем все абзацы из файла Word в одну текстовую переменную,
+                    # разделяя их обычными переносами строк \n
+                    text_member = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+                elif id_button == "guest":
+                    doc = docx.Document(file_path)
+                    # Собираем все абзацы из файла Word в одну текстовую переменную,
+                    # разделяя их обычными переносами строк \n
+                    text_guest = "\n".join([paragraph.text for paragraph in doc.paragraphs])                    
 
             # ЕСЛИ ЭТО ОБЫЧНЫЙ ТЕКСТ (.txt)
             else:
-                with open(file_path, "r", encoding="cp1251") as f:
-                    text = f.read()
+                if id_button =="member":
+                    with open(file_path, "r", encoding="cp1251") as f:
+                        text_member = f.read()
+                else:
+                    with open(file_path, "r", encoding="cp1251") as f:
+                        text_guest = f.read()
 
             # Проверяем, удалось ли вытащить текст
-            if text.strip():
-                print("--- УСПЕШНО ПРОЧИТАННЫЙ ТЕКСТ ---")
-                print(text)
-                print("---------------------------------")
+            if text_member.strip() and id_button == "member":
                 messagebox.showinfo(
-                    "Успех", f"Файл прочитан! Найдено {len(text)} символов."
+                    "Успех", f"Файл прочитан! Найдено {len(text_member)} символов."
+                )
+            elif text_guest.strip() and id_button == "guest":
+                messagebox.showinfo(
+                    "Успех", f"Файл прочитан! Найдено {len(text_guest)} символов."
                 )
             else:
                 messagebox.showwarning(
                     "Внимание", "Файл открыт, но текста внутри не обнаружено."
-                )
+                )                
 
         except Exception as e:
             messagebox.showerror(
@@ -69,14 +81,14 @@ def attach_file_doc():
             )
 
 
-def load_data_from_csv_users():
+def load_data_from_csv(csv_file):
     """Функция загрузки данных из CSV-файла."""
-    if not os.path.exists(CSV_FILE):
-        create_test_csv_users()
+    if not os.path.exists(csv_file):
+        create_test_csv(csv_file)
 
     data = []
     try:
-        with open(CSV_FILE, mode="r", encoding="utf-8-sig") as f:
+        with open(csv_file, mode="r", encoding="utf-8-sig") as f:
             reader = csv.reader(f, delimiter=";")
             next(reader)  # Пропускаем заголовок
 
@@ -90,36 +102,79 @@ def load_data_from_csv_users():
     return data
 
 
-def create_test_csv_users():
+def create_test_csv(csv_file):
     """Создает тестовый файл, если его не существует."""
-    test_data = [
-        ["id", "name", "email", "role"],
-        ["1", "Алексей", "artyombirulya@gmail.com", "Админ"],  # Ваш email для теста
-        ["2", "Мария", "maria@example.com", "Пользователь"],
-        ["3", "Иван", "ivan@example.com", "Модератор"],
-    ]
-    with open(CSV_FILE, mode="w", encoding="utf-8-sig", newline="") as f:
+    if csv_file == "users.csv":
+        test_data = [
+            ["id", "name", "email", "role"],
+            ["1", "Алексей", "artyombirulya@gmail.com", "Админ"],  # Ваш email для теста
+            ["2", "Мария", "maria@example.com", "Пользователь"],
+            ["3", "Иван", "ivan@example.com", "Модератор"],
+        ]
+    elif csv_file == "Meetings.csv":
+        test_data = [
+                ["name_of_meet", "end_date", "start_date"],
+                ["Алексей", "02.04.26", "02.04.26"],  # Ваш email для теста
+                ["Мария", "02.04.26", "02.04.26"],
+                ["Иван", "02.04.26", "02.04.26"],
+            ]
+    elif csv_file == "guests.csv":
+        test_data = [
+                    ["id", "name", "email"],
+                    ["1", "Артём", "artyombirulya@gmail.com"],  # Ваш email для теста
+                    ["2", "Мария", "maria@example.com"],
+                    ["3", "Иван", "ivan@example.com"],
+                ]
+    with open(csv_file, mode="w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerows(test_data)
 
 
 
 def send_emails():
-    global text
+    global text_member
+    global text_guest
     """Функция рассылки писем по всему списку из таблицы."""
-    all_items = tree_of_users.get_children()
+    all_items_members = tree_of_users.get_children()
+    all_items_guests = tree_of_guest.get_children()
 
-    if not all_items:
-        messagebox.showwarning("Внимание", "Список пользователей пуст!")
+    if not all_items_members:
+        messagebox.showwarning("Внимание", "Список участникоы пуст!")
+        return
+    elif not all_items_guests:
+        messagebox.showwarning("Внимание", "Список гостей пуст!")
+        return
+    elif not all_items_guests and not all_items_members:
+        messagebox.showwarning("Внимание", "Все списки гостей и участников пустые. Ты тупой?")
         return
 
     sent_count = 0
 
+    all_items = []
+
+    for item in all_items_members:
+        all_items.append((item,"member",tree_of_users))
+    for item in all_items_guests:
+            all_items.append((item,"guest",tree_of_guest))
+
+
+
     # Проходим циклом по каждой строке таблицы
-    for item in all_items:
-        values = tree_of_users.item(item, "values")
+    for item,role,tree in all_items:
+        values = tree.item(item, "values")
+        if len(values)<3:
+            continue
+
+
         user_name = values[1]
         user_email = values[2]
+
+        if role == "member":
+            current_text = text_member
+            sub_prex = "участник"
+        elif role == "guest":
+            current_text = text_guest
+            sub_prex = "гость"
 
         print(f"Отправка на {user_email}: Hello, {user_name}!")
 
@@ -130,15 +185,13 @@ def send_emails():
 
         # Создание письма
         msg = EmailMessage()
-        msg["Subject"] = f" meeting named: {entry_name.get()}"
+        msg["Subject"] = f" Приглашение на мероприятие {entry_name.get()}"
         print(entry_name.get())
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Hello, {user_name}!,our meeting data is {entry_data.get()} and time: {entry_time.get()}. \n{text}"
+            f"Привет, {user_name}! Вы наш {sub_prex} данного мероприятия, дата мероприятия: {entry_data.get()} и время: {entry_time.get()}.\n Дальнейшие инструкции здесь: \n {current_text}"
         )
-        print(text)
-
         # Отправка через сервер Яндекса
         try:
             with smtplib.SMTP_SSL("smtp.yandex.ru", 465) as server:
@@ -164,75 +217,17 @@ def send_emails():
         )
 
 
-
-
-
-
-
-
 placeholder_map = {}
-
-
-def load_data_from_csv_meet():
-    """Функция загрузки данных из CSV-файла."""
-    # 1. Проверяем, существует ли файл
-    if not os.path.exists(CSV_FILE_MEET):
-        choice = messagebox.askyesno(
-            "Не найден файл Meetings.csv", "Создать файл с шаблоном?"
-        )
-        if choice:
-            create_test_csv_meet()  # Создаем файл
-        else:
-            root.destroy()
-            sys.exit()
-
-    data = []
-    try:
-        with open(CSV_FILE_MEET, mode="r", encoding="utf-8-sig") as f:
-            reader = csv.reader(f, delimiter=";")
-            next(reader)  # Пропускаем заголовок
-
-            for row in reader:
-                if row:  # Проверка на пустые строки
-                    data.append(row)
-    except Exception as e:
-        messagebox.showerror(
-            "Ошибка", f"Не удалось прочитать файл {CSV_FILE_MEET}:\n{e}"
-        )
-
-    return data
-    
-
-
-def create_test_csv_meet():
-    #Создает тестовый файл, если его не существует.
-    test_data = [
-        ["name_of_meet", "end_date", "start_date"],
-        ["Алексей", "02.04.26", "02.04.26"],  # Ваш email для теста
-        ["Мария", "02.04.26", "02.04.26"],
-        ["Иван", "02.04.26", "02.04.26"],
-    ]
-    with open(CSV_FILE_MEET, mode="w", encoding="utf-8-sig", newline="") as f:
-        writer = csv.writer(f, delimiter=";")
-        writer.writerows(test_data)
-
-
 
 def enter_function_input(event):
     text_placeholder = placeholder_map.get(event.widget)
     if event.widget.get() != text_placeholder and event.widget.get() != "":
         event.widget.config(state="readonly")
 
-
-
-
-
-
-
-
+#Гуишки для окна
 root = tk.Tk()
 root.title("Event manager(Editing)")
-root.resizable(False, False)
+#root.resizable(False, False)
 root.geometry("750x900")
 
 container_meetings = ttk.Frame(root)
@@ -247,6 +242,11 @@ container_users.grid(column=1,row=3,padx=10)
 scrollbar_users = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
 scrollbar_users.grid(column=2,sticky="w",row=3,ipady=100)
 
+container_guest = ttk.Frame(root)
+container_guest.grid(column=1,row=3,padx=10)
+
+scrollbar_guest = ttk.Scrollbar(container_users, orient=tk.VERTICAL)#----Скролбар
+scrollbar_guest.grid(column=2,sticky="w",row=3,ipady=100)
 
 # Создаем таблицу (Treeview)
 
@@ -267,9 +267,9 @@ tree_of_meetings.column("name_of_meet", width=120, anchor=tk.CENTER)
 tree_of_meetings.column("date", width=120)
 tree_of_meetings.column("time", width=120)
 
-meet_data = load_data_from_csv_meet()
-for user in meet_data:
-    tree_of_meetings.insert("", tk.END, values=user)
+meet_data = load_data_from_csv("Meetings.csv")
+for meet in meet_data:
+    tree_of_meetings.insert("", tk.END, values=meet)
 
 tree_of_meetings.grid(column=1,row=4,ipadx=0,ipady=0)
 
@@ -286,13 +286,33 @@ tree_of_users.column("email", width=180)
 tree_of_users.column("role", width=100)
 
 # Загружаем данные из файла и вставляем в таблицу
-users_data = load_data_from_csv_users()
+users_data = load_data_from_csv("users.csv")
 for user in users_data:
     tree_of_users.insert("", tk.END, values=user)
 
 tree_of_users.grid(column=1,row=3,ipadx=0,ipady=0,pady=0)
 
+columns_guest = ("id", "name", "email")
+tree_of_guest = ttk.Treeview(container_users, columns=columns_users, show="headings",yscrollcommand=scrollbar_users.set)
+scrollbar_guest.config(command=tree_of_users.yview)
 
+tree_of_guest.heading("id", text="ID")
+tree_of_guest.heading("name", text="Имя")
+tree_of_guest.heading("email", text="Email")
+
+
+# Задаем размеры колонок
+tree_of_guest.column("id", width=40, anchor=tk.CENTER)
+tree_of_guest.column("name", width=120)
+tree_of_guest.column("email", width=180)
+tree_of_guest.column("role", width=100)
+
+# Загружаем данные из файла и вставляем в таблицу
+guest_data = load_data_from_csv("guests.csv")
+for guest in guest_data:
+    tree_of_guest.insert("", tk.END, values=guest)
+
+tree_of_guest.grid(column=1,row=5,ipadx=0,ipady=0,pady=0)
 
 
 
@@ -306,8 +326,11 @@ btn_send = ttk.Button(
     root, text="Разослать всем пользователям", command=send_emails,style="My.TButton")
 btn_send.grid(column=1, row=6, columnspan=3, pady=15, ipady=10)
 
-btn_attach = ttk.Button(root,text="📎Прикрепить текстовый файл📎",command=attach_file_doc,style="My.TButton")
-btn_attach.grid(column=1, row=5, columnspan=3, pady=15, ipady=10)
+btn_attach_member = ttk.Button(root,text="Прикрепить шаблон участника",command=lambda:attach_file_doc("member"),style="My.TButton")
+btn_attach_member .grid(column=2, row=4, pady=15, ipady=10)
+
+btn_attach_guest = ttk.Button(root,text="Прикрепить шаблон гостя",command=lambda:attach_file_doc("guest"),style="My.TButton")
+btn_attach_guest.grid(column=2, row=3, pady=15, ipady=10)
 
 def off_entry_mouse(event):
     current_entry = event.widget
