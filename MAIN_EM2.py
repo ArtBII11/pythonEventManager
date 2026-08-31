@@ -54,10 +54,10 @@ def attach_file_doc(id_button):
             # ЕСЛИ ЭТО ОБЫЧНЫЙ ТЕКСТ (.txt)
             else:
                 if id_button =="member":
-                    with open(file_path, "r", encoding="cp1251") as f:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         text_member = f.read()
                 else:
-                    with open(file_path, "r", encoding="cp1251") as f:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         text_guest = f.read()
 
             # Проверяем, удалось ли вытащить текст
@@ -114,9 +114,9 @@ def create_test_csv(csv_file):
     elif csv_file == "Meetings.csv":
         test_data = [
                 ["name_of_meet", "end_date", "start_date"],
-                ["Алексей", "02.04.26", "02.04.26"],  # Ваш email для теста
-                ["Мария", "02.04.26", "02.04.26"],
-                ["Иван", "02.04.26", "02.04.26"],
+                ["Met", "02.04.26", "02.04.26"],  # Ваш email для теста
+                ["et2", "02.04.26", "02.04.26"],
+                ["IRL", "02.04.26", "02.04.26"],
             ]
     elif csv_file == "guests.csv":
         test_data = [
@@ -183,6 +183,14 @@ def send_emails():
         PASSWORD = "fiwvbwzisbfnincq"  # Ваш 16-значный пароль приложения
         RECIPIENT = user_email
 
+        custom_text = current_text.format(
+            username = user_name,
+            meet_name = entry_name.get(),
+            meet_time = entry_time.get(),
+            meet_date = entry_data.get()
+        )
+        
+        
         # Создание письма
         msg = EmailMessage()
         msg["Subject"] = f" Приглашение на мероприятие {entry_name.get()}"
@@ -190,7 +198,7 @@ def send_emails():
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Привет, {user_name}! Вы наш {sub_prex} данного мероприятия, дата мероприятия: {entry_data.get()} и время: {entry_time.get()}.\n Дальнейшие инструкции здесь: \n {current_text}"
+            f"Привет, {user_name}! Вы наш {sub_prex} данного мероприятия, дата мероприятия: {entry_data.get()} и время: {entry_time.get()}.\n Дальнейшие инструкции здесь: \n {custom_text}"
         )
         # Отправка через сервер Яндекса
         try:
@@ -267,8 +275,8 @@ tree_of_meetings.column("name_of_meet", width=120, anchor=tk.CENTER)
 tree_of_meetings.column("date", width=120)
 tree_of_meetings.column("time", width=120)
 
-meet_data = load_data_from_csv("Meetings.csv")
-for meet in meet_data:
+meet_data_t = load_data_from_csv("Meetings.csv")
+for meet in meet_data_t:
     tree_of_meetings.insert("", tk.END, values=meet)
 
 tree_of_meetings.grid(column=1,row=5,ipadx=0,ipady=0)
@@ -312,11 +320,6 @@ for guest in guest_data:
     tree_of_guest.insert("", tk.END, values=guest)
 
 tree_of_guest.grid(column=1,row=4,ipadx=0,ipady=0,pady=0)
-
-
-
-
-
 
 style = ttk.Style()
 style.configure("My.TButton",font=("Arial", 12, "bold"),)
