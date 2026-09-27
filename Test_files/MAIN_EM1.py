@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
-CSV_FILE_MEET = "Meetings.csv"
+CSV_FILE_MEET = "мeetings.csv"
 
 
 

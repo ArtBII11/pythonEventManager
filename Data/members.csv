@@ -1,4 +1,6 @@
-﻿name_of_meet;date;time
-Met;02.04.26;02.04.26
-et2;02.04.26;02.04.26
-IRL;02.04.26;02.04.26
+﻿id;name;email;role
+1;Георгий;mailEx@mail.com;Уборщик
+2;Владислав;mailEx@mail.com;Аниматор
+3;Пётр;mailEx@mail.com;VIP
+
+

@@ -11,7 +11,7 @@ import os
 import docx
 
 
-CSV_FILE_MEETTINGS = r"D:\EM\pythonEventManager\Data\Meetings.csv"
+CSV_FILE_MEETTINGS = r"D:\EM\pythonEventManager\Data\мeetings.csv"
 CSV_FILE_MEMBERS = r"D:\EM\pythonEventManager\Data\members.csv"
 CSV_FILE_GUESTS = r"D:\EM\pythonEventManager\Data\guests.csv"
 
@@ -197,7 +197,7 @@ def send_emails():
         msg["From"] = SENDER
         msg["To"] = RECIPIENT
         msg.set_content(
-            f"Привет, {user_name}! Вы наш {sub_prex} данного мероприятия, дата мероприятия: {entry_data.get()} и время: {entry_time.get()}.\n Дальнейшие инструкции здесь: \n {custom_text}"
+            f"Привет, {user_name}! Вы наш {sub_prex} данного мероприятия, дата мероприятия: {entry_data.get()} и время: {entry_time.get()}. Бюджет: {budget1_var.get()} и траты: {budget2_var.get()} \n Дальнейшие инструкции здесь: \n {custom_text}"
         )
         # Отправка через сервер Яндекса
         try:
@@ -438,41 +438,4 @@ entry_budget_perhum = ttk.Entry(root,textvariable=budget2_var)
 entry_budget_perhum.grid(column=3,row=2,ipady=10,ipadx=20)
 
 entry_budget_perhum.bind("<Return>",enter_function_input)
-
-
-
-
-# label_title = tk.Label(root, text="Список запланированных мероприятий",font=("Arial",12,"bold"))
-# label_title.pack(pady=(20,0))
-
-# container = ttk.Frame(root,height=200,width=600)#----Контейнер для схемы
-# container.pack_propagate(False)
-# container.pack(padx=20,pady=10)
-
-
-
-
-# columns = ("name", "email", "role")
-# tree = ttk.Treeview(
-#     container, columns=columns, show="headings", yscrollcommand=scrollbar.set
-# )
-# scrollbar.config(command=tree.yview)
-
-# # Задаем заголовки колонок
-
-# tree.heading("name", text="Название мероприятия")
-# tree.heading("email", text="Конец мероприятия")
-# tree.heading("role", text="Начало мероприятия")
-
-# # Задаем размеры колонок
-# tree.column("name", width=120, anchor=tk.CENTER)
-# tree.column("email", width=180)
-# tree.column("role", width=100)
-
-# users_data = load_data_from_csv()
-# for user in users_data:
-#     tree.insert("", tk.END, values=user)
-
-# tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
 root.mainloop()

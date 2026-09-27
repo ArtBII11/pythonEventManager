@@ -11,7 +11,7 @@ import os
 import docx
 
 
-CSV_FILE_MEET = "Meetings.csv"
+CSV_FILE_MEET = "мeetings.csv"
 CSV_FILE = "users.csv"
 text_guest = ""
 text_member = ""
